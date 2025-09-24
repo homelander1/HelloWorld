@@ -7,12 +7,18 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -33,7 +39,6 @@ class MainActivity : ComponentActivity() {
 
         enableEdgeToEdge()
         setContent {
-            // Remove HelloAppTheme wrapper if it doesn't exist
             Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                 MainContent(
                     modifier = Modifier.padding(innerPadding),
@@ -82,7 +87,7 @@ fun MainContent(
     modifier: Modifier = Modifier,
     onNavigateToSecond: () -> Unit = {}
 ) {
-    // Array of 5 names to cycle through
+    // Array of 4 names to cycle through
     val names = arrayOf("Roman", "Ivan", "Pavlo", "Petro")
 
     // Remember the current index in the names array
@@ -135,7 +140,6 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
 @Preview(showBackground = true)
 @Composable
 fun GreetingPreview() {
-    // Remove HelloAppTheme wrapper if it doesn't exist
     MainContent()
 }
 
@@ -200,24 +204,85 @@ fun SecondContent(
     modifier: Modifier = Modifier,
     onNavigateBack: () -> Unit = {}
 ) {
+    // Стан для зберігання введеного тексту
+    val inputText = remember { mutableStateOf("") }
+    // Стан для зберігання підтвердженого тексту
+    val confirmedText = remember { mutableStateOf("") }
+
     Column(
-        modifier = modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.Center,
+        modifier = modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
             text = "Second Activity Screen",
-            modifier = Modifier.padding(16.dp)
+            style = MaterialTheme.typography.headlineSmall,
+            modifier = Modifier.padding(bottom = 16.dp)
         )
 
-        androidx.compose.foundation.layout.Spacer(modifier = Modifier.padding(16.dp))
+        // Поле для вводу тексту
+        OutlinedTextField(
+            value = inputText.value,
+            onValueChange = { inputText.value = it },
+            label = { Text("Введіть текст") },
+            placeholder = { Text("Місце для тексту") },
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = false,
+            maxLines = 3
+        )
 
+        // Кнопка для підтвердження вводу
+        Button(
+            onClick = {
+                if (inputText.value.isNotBlank()) {
+                    confirmedText.value = inputText.value.trim()
+                    inputText.value = "" // Очищаємо поле вводу після підтвердження
+                    Log.d("SecondActivity", "Text confirmed: ${confirmedText.value}")
+                }
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Підтвердити введення")
+        }
+
+        // Місце для виведення підтвердженого тексту
+        if (confirmedText.value.isNotEmpty()) {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer
+                )
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp)
+                ) {
+                    Text(
+                        text = "Виведення тексту:",
+                        style = MaterialTheme.typography.titleSmall,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                    androidx.compose.foundation.layout.Spacer(modifier = Modifier.padding(4.dp))
+                    Text(
+                        text = confirmedText.value,
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                }
+            }
+        }
+
+        androidx.compose.foundation.layout.Spacer(modifier = Modifier.weight(1f))
+
+        // Кнопка повернення
         Button(
             onClick = {
                 onNavigateBack()
-            }
+            },
+            modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Return to Previous Screen")
+            Text("Повернутися до попереднього екрану")
         }
     }
 }
